@@ -9,9 +9,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,7 +21,7 @@
 (function() {
 
     // Generate four random hex digits.
-    var word = function() {
+    var _word = function() {
         return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
     };
     
@@ -30,7 +30,18 @@
     
         // Generate a pseudo-GUID by concatenating random hexadecimal.
         guid: function() {
-            return (word() + word() + "-" + word() + "-" + word() + "-" + word() + "-" + word() + word() + word());
+            return (_word() + _word() + "-" + _word() + "-" + _word() + "-" + _word() + "-" + _word() + _word() + _word());
+        },
+        
+        // Invoke or publish depending on type
+        callOrPublish: function(callback, data) {
+            if (_.isFunction(callback)) {
+                callback.apply(null, [data]);
+            } else if (_.isString(callback)) {
+                PageBus.publish(callback, data);
+            } else {
+                throw new Error('invalid plug callback');
+            }
         }
     });
 })();

@@ -137,10 +137,10 @@
     
     // public methods
     _.extend(PageBus, {
-		reset: function() {
-			_root = new PageBus.Channel();
-		},
-		
+        reset: function() {
+            _root = new PageBus.Channel();
+        },
+        
         subscribe: function(channel, context, callback, data) {
         
             // check if subscribe(channel, callback, data) was used

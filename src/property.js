@@ -19,7 +19,9 @@
  * limitations under the License.
  */
 (function() {
-    this.Property = function(options) {
+	var root = this;
+	
+    root.Property = function(options) {
         if (_.isString(options)) {
             var hash = options.indexOf('#');
             if (hash >= 0) {
@@ -54,7 +56,7 @@
     
     var _error = function(name, op, xhr, error /* fn({ status, text, xhr }) */) {
         if (error) {
-            _.publish(error, {
+            _.callOrPublish(error, {
                 status: xhr.status,
                 text: xhr.getStatusText(),
                 xhr: xhr
@@ -77,7 +79,7 @@
                         _this.etag = xhr.getETag();
                     }
                     if (success) {
-                        _.publish(success, _this);
+                        _.callOrPublish(success, _this);
                     } else {
                         return _this.value;
                     }
@@ -100,7 +102,7 @@
                     _this.value = value;
                     _this.etag = xhr.getETag();
                     if (success) {
-                        _.publish(success, _this);
+                        _.callOrPublish(success, _this);
                     } else {
                         return _this.value;
                     }
@@ -128,7 +130,7 @@
                     _this.value = null;
                     _this.etag = null;
                     if (success) {
-                        _.publish(success, _this);
+                        _.callOrPublish(success, _this);
                     } else {
                         return _this.value;
                     }

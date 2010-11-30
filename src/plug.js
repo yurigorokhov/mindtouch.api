@@ -19,6 +19,16 @@
  * limitations under the License.
  */
 (function() {
+	var root = this;
+    
+    root.Plug = function(url, options) {
+        if (!url) {
+            throw new Error("missing url argument");
+        }
+        options || (options = {});
+        this.headers = options.headers || {};
+        _.extend(this, _.isString(url) ? _parseUrl(url) : url, options);
+    };
 
     // object used to extend XHR instances (since it has no prototype)
     var extendXhr = function(xhr) {
@@ -227,25 +237,6 @@
         return result;
     };
     
-    var _invoke = function(callback, data) {
-        if (_.isString(callback)) {
-            PageBus.publish(callback, data);
-        } else if (_.isFunction(callback)) {
-            callback.apply(null, [data]);
-        } else {
-            throw new Error('invalid plug callback');
-        }
-    };
-    
-    this.Plug = function(url, options) {
-        if (!url) {
-            throw new Error("missing url argument");
-        }
-        options || (options = {});
-        this.headers = options.headers || {};
-        _.extend(this, _.isString(url) ? _parseUrl(url) : url, options);
-    };
-    
     _.extend(this.Plug.prototype, {
         getUrl: function() {
             var url = '';
@@ -281,9 +272,9 @@
             return url;
         },
         
-        get: function(callback, verb) {
+        get: function(callback, /* consider removing from function argument list and access via arguments array */ verb) {
             var async = callback != null;
-            
+
             // initiate AJAX request
             var xhr = $.ajax({
                 context: this,
@@ -302,10 +293,10 @@
                 beforeSend: this._beforeSend,
                 
                 // set callback
-                complete: function(xhr) {
+                complete: async && function(xhr) {
                     extendXhr(xhr);
                     if (callback) {
-                        _invoke(callback, xhr);
+                        _.callOrPublish(callback, xhr);
                     } else if (!xhr.isSuccess()) {
                         throw new Error('Plug ' + (this.headers['X-HTTP-Method-Override'] || 'GET') + ' request failed for ' + this.getUrl() + ' (status: ' + xhr.status + ' - ' + xhr.getStatusText() + ')');
                     }
@@ -342,10 +333,10 @@
                 beforeSend: this._beforeSend,
                 
                 // set callback
-                complete: function(xhr) {
+                complete: async && function(xhr) {
                     extendXhr(xhr);
                     if (callback) {
-                        _invoke(callback, xhr);
+                        _.callOrPublish(callback, xhr);
                     } else if (!xhr.isSuccess()) {
                         throw new Error('Plug ' + (this.headers['X-HTTP-Method-Override'] || 'POST') + ' request failed for ' + this.getUrl() + ' (status: ' + xhr.status + ' - ' + xhr.getStatusText() + ')');
                     }

@@ -22,7 +22,9 @@
 // TODO: PropertyCollectionStore
 
 (function() {
-    this.PropertyStore = function(property) {
+	var root = this;
+
+    root.PropertyStore = function(property) {
 		if(_.isString(property)) {
 	        this.property = new Property(property);
 		} else {
