@@ -65,99 +65,115 @@ $(function() {
             equal(p.protocol, 'http', 'protocol');
             equal(p.hostname, 'localhost', 'host');
             equal(p.port, '80', 'port');
+            equal(p.implicitPort, true, 'implicit port');
         },
         'https://localhost': function(p) {
             equal(p.protocol, 'https', 'protocol');
             equal(p.hostname, 'localhost', 'host');
             equal(p.port, '443', 'port');
+            equal(p.implicitPort, true, 'implicit port');
         },
         'http://localhost:8080': function(p) {
             equal(p.protocol, 'http', 'protocol');
             equal(p.hostname, 'localhost', 'host');
             equal(p.port, '8080', 'port');
+            equal(p.implicitPort, false, 'implicit port');
         },
         'http://localhost:80': function(p) {
             equal(p.protocol, 'http', 'protocol');
             equal(p.hostname, 'localhost', 'host');
             equal(p.port, '80', 'port');
+            equal(p.implicitPort, false, 'implicit port');
         },
         'https://localhost:443': function(p) {
             equal(p.protocol, 'https', 'protocol');
             equal(p.hostname, 'localhost', 'host');
             equal(p.port, '443', 'port');
+            equal(p.implicitPort, false, 'implicit port');
         },
         'https://localhost:8080': function(p) {
             equal(p.protocol, 'https', 'protocol');
             equal(p.hostname, 'localhost', 'host');
             equal(p.port, '8080', 'port');
+            equal(p.implicitPort, false, 'implicit port');
         },
         'http://192.168.1.1': function(p) {
             equal(p.protocol, 'http', 'protocol');
             equal(p.hostname, '192.168.1.1', 'host');
             equal(p.port, '80', 'port');
+            equal(p.implicitPort, true, 'implicit port');
         },
         'http://192.168.1.1:8080': function(p) {
             equal(p.protocol, 'http', 'protocol');
             equal(p.hostname, '192.168.1.1', 'host');
             equal(p.port, '8080', 'port');
+            equal(p.implicitPort, false, 'implicit port');
         },
         'https://192.168.1.1': function(p) {
             equal(p.protocol, 'https', 'protocol');
             equal(p.hostname, '192.168.1.1', 'host');
             equal(p.port, '443', 'port');
+            equal(p.implicitPort, true, 'implicit port');
         },
         'https://192.168.1.1:8080': function(p) {
             equal(p.protocol, 'https', 'protocol');
             equal(p.hostname, '192.168.1.1', 'host');
             equal(p.port, '8080', 'port');
+            equal(p.implicitPort, false, 'implicit port');
         },
         'http://sub.domain.root': function(p) {
             equal(p.protocol, 'http', 'protocol');
             equal(p.hostname, 'sub.domain.root', 'host');
             equal(p.port, '80', 'port');
+            equal(p.implicitPort, true, 'implicit port');
         },
         'http://sub.domain.root:8080': function(p) {
             equal(p.protocol, 'http', 'protocol');
             equal(p.hostname, 'sub.domain.root', 'host');
             equal(p.port, '8080', 'port');
+            equal(p.implicitPort, false, 'implicit port');
         },
         'https://sub.domain.root': function(p) {
             equal(p.protocol, 'https', 'protocol');
             equal(p.hostname, 'sub.domain.root', 'host');
             equal(p.port, '443', 'port');
+            equal(p.implicitPort, true, 'implicit port');
         },
         'https://sub.domain.root:8080': function(p) {
             equal(p.protocol, 'https', 'protocol');
             equal(p.hostname, 'sub.domain.root', 'host');
             equal(p.port, '8080', 'port');
+            equal(p.implicitPort, false, 'implicit port');
         },
         '': function(p) {
             equal(p.protocol, null, 'protocol');
             equal(p.hostname, null, 'host');
             equal(p.port, null, 'port');
+            equal(p.implicitPort, true, 'implicit port');
         },
         'file://': function(p) {
             equal(p.protocol, 'file', 'protocol');
             equal(p.hostname, '', 'host');
             equal(p.port, null, 'port');
+            equal(p.implicitPort, true, 'implicit port');
         }
     };
     var paths = {
         '/': function(p) {
             deepEqual(p.segments, [], 'segments');
-            equal(p.trailingSlash, true);
+            equal(p.trailingSlash, true, 'trailing slash');
         },
         '/path': function(p) {
             deepEqual(p.segments, ['path'], 'segments');
-            equal(p.trailingSlash, false);
+            equal(p.trailingSlash, false, 'trailing slash');
         },
         '/path/': function(p) {
             deepEqual(p.segments, ['path'], 'segments');
-            equal(p.trailingSlash, true);
+            equal(p.trailingSlash, true, 'trailing slash');
         },
         '/path/subpath': function(p) {
             deepEqual(p.segments, ['path', 'subpath'], 'segments');
-            equal(p.trailingSlash, false);
+            equal(p.trailingSlash, false, 'trailing slash');
         }
     };
     var params = {

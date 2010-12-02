@@ -11,7 +11,7 @@
  * You may obtain a copy of the License at
  * 
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -151,61 +151,77 @@
             }
         });
     };
-    
+
+	var _uriRegex = /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(#.*)?)/;
+	var _uriRegexKeys = [ 'original', 'protocol', 'authority', 'userInfo', 'user', 'password', 'hostname', 'port', 'relative', 'path', 'directory', 'file', 'query', 'fragment' ];
     var _parseUrl = function(url) {
         if (!url) {
             return {
                 original: '',
-                protocol: '',
-                host: '',
-                port: '0',
+                protocol: null,
+				authority: null,
+				userInfo: null,
+				user: null,
+				password: null,
+                hostname: null,
+                port: null,
+				relative: null,
+				path: null,
+				directory: null,
+				file: null,
+				query: null,
                 params: null,
                 fragment: null,
                 segments: []
             };
         }
-        var a = document.createElement('a');
-        a.href = url;
-        var result = {
-            original: url,
-            port: (function() {
-                return (a.port && a.port !== '0') ? a.port : null;
-            })(),
-            //query: a.search,
-            params: (function() {
-                var ret = (url.indexOf('?') >= 0) ? {} : null, seg = a.search.replace(/^\?/, '').split('&');
-                for (var i = 0; i < seg.length; i++) {
-                    if (!seg[i]) {
-                        continue;
-                    }
-                    var s = seg[i].split('=');
-                    ret[s[0]] = (s.length > 1) ? decodeURIComponent(s[1]).decodeUtf8() : null;
+		
+		// parse url
+		var	matches = _uriRegex.exec(url);
+		var result = {};
+		for(var i = 0; i < _uriRegexKeys.length; ++i) {
+			result[_uriRegexKeys[i]] = matches[i] || null;
+		}
+		
+		// decode fragment
+		result.fragment = (result.fragment !== null) ? decodeURIComponent(result.fragment.substr(1)).decodeUtf8() : null;
+		
+		// detect trailing slash
+        result.trailingSlash = result.path ? (result.path[result.path.length - 1] === '/') : false;
+		
+		// convert query into params
+        result.params = (url.indexOf('?') < 0) ? null : (function() {
+            var ret = {};
+			if(result.query !== null) {
+				var params = result.query.split('&');
+	            for (var i = 0; i < params.length; ++i) {
+	                if (params[i]) {
+		                var param = params[i].split('=');
+		                ret[param[0]] = (param.length > 1) ? decodeURIComponent(param[1]).decodeUtf8() : null;
+	                }
+	            }
+			}
+            return ret;
+        })();
+		
+		// convert path into segments
+        result.segments = (function() {
+            var ret = result.path.replace(/^\//, '').replace(/\/$/, '').split('/');
+            if (ret.length === 1 && ret[0].length === 0) {
+                ret = [];
+            } else {
+                for (var i = 0; i < ret.length; ++i) {
+                    ret[i] = decodeURIComponent(ret[i]).decodeUtf8();
                 }
-                return ret;
-            })(),
-            fragment: (url.indexOf('#') != -1) ? decodeURIComponent(a.hash.substr(1)).decodeUtf8() : null,
-            segments: (function() {
-                var ret = a.pathname.replace(/^\//, '').replace(/\/$/, '').split('/');
-                if (ret.length === 1 && ret[0].length === 0) {
-                    ret = [];
-                } else {
-                    for (var i = 0; i < ret.length; ++i) {
-                        ret[i] = decodeURIComponent(ret[i]).decodeUtf8();
-                    }
-                }
-                return ret;
-            })(),
-            trailingSlash: a.pathname ? a.pathname[a.pathname.length - 1] == '/' : false
-            //file: (a.pathname.match(/\/([^\/?#]+)$/i) || [, ''])[1],
-            //path: a.pathname.replace(/^([^\/])/, '/$1'),
-            //relative: (a.href.match(/tp:\/\/[^\/]+(.+)/) || [, ''])[1]
-        };
+            }
+            return ret;
+        })();
         
         // determine protocol; some browsers return 'file:' instead of '' when it's missing 
-        result.protocol = (a.protocol !== 'file:' || url.substr(0, 7) === 'file://') ? a.protocol.replace(':', '') : null;
+        result.protocol = result.protocol ? result.protocol : null;
         
         // determine hostname; some browsers return 'localhost' instead of '' when it's missing
-        result.hostname = result.protocol ? a.hostname : null;
+        result.hostname = result.protocol ? (result.hostname || '') : null;
         
         // check if url contained it's default port number explicitly
         result.implicitPort = (result.port === null);
