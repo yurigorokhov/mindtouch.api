@@ -9,7 +9,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 (function() {
-	var root = this;
+    var root = this;
     
     root.Plug = function(url, options) {
         if (!url) {
@@ -29,7 +29,7 @@
         this.headers = options.headers || {};
         _.extend(this, _.isString(url) ? _parseUrl(url) : url, options);
     };
-
+    
     // object used to extend XHR instances (since it has no prototype)
     var extendXhr = function(xhr) {
         return _.extend(xhr, {
@@ -151,60 +151,61 @@
             }
         });
     };
-
-	var _uriRegex = /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(#.*)?)/;
-	var _uriRegexKeys = [ 'original', 'protocol', 'authority', 'userInfo', 'user', 'password', 'hostname', 'port', 'relative', 'path', 'directory', 'file', 'query', 'fragment' ];
+    
+	// uri parser function
+    var _uriRegex = /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(#.*)?)/;
+    var _uriRegexKeys = ['original', 'protocol', 'authority', 'userInfo', 'user', 'password', 'hostname', 'port', 'relative', 'path', 'directory', 'file', 'query', 'fragment'];
     var _parseUrl = function(url) {
         if (!url) {
             return {
                 original: '',
                 protocol: null,
-				authority: null,
-				userInfo: null,
-				user: null,
-				password: null,
+                authority: null,
+                userInfo: null,
+                user: null,
+                password: null,
                 hostname: null,
                 port: null,
-				relative: null,
-				path: null,
-				directory: null,
-				file: null,
-				query: null,
+                relative: null,
+                path: null,
+                directory: null,
+                file: null,
+                query: null,
                 params: null,
                 fragment: null,
                 segments: []
             };
         }
-		
-		// parse url
-		var	matches = _uriRegex.exec(url);
-		var result = {};
-		for(var i = 0; i < _uriRegexKeys.length; ++i) {
-			result[_uriRegexKeys[i]] = matches[i] || null;
-		}
-		
-		// decode fragment
-		result.fragment = (result.fragment !== null) ? decodeURIComponent(result.fragment.substr(1)).decodeUtf8() : null;
-		
-		// detect trailing slash
+        
+        // parse url
+        var matches = _uriRegex.exec(url);
+        var result = {};
+        for (var i = 0; i < _uriRegexKeys.length; ++i) {
+            result[_uriRegexKeys[i]] = matches[i] || null;
+        }
+        
+        // decode fragment
+        result.fragment = (result.fragment !== null) ? decodeURIComponent(result.fragment.substr(1)).decodeUtf8() : null;
+        
+        // detect trailing slash
         result.trailingSlash = result.path ? (result.path[result.path.length - 1] === '/') : false;
-		
-		// convert query into params
+        
+        // convert query into params
         result.params = (url.indexOf('?') < 0) ? null : (function() {
             var ret = {};
-			if(result.query !== null) {
-				var params = result.query.split('&');
-	            for (var i = 0; i < params.length; ++i) {
-	                if (params[i]) {
-		                var param = params[i].split('=');
-		                ret[param[0]] = (param.length > 1) ? decodeURIComponent(param[1]).decodeUtf8() : null;
-	                }
-	            }
-			}
+            if (result.query !== null) {
+                var params = result.query.split('&');
+                for (var i = 0; i < params.length; ++i) {
+                    if (params[i]) {
+                        var param = params[i].split('=');
+                        ret[param[0]] = (param.length > 1) ? decodeURIComponent(param[1]).decodeUtf8() : null;
+                    }
+                }
+            }
             return ret;
         })();
-		
-		// convert path into segments
+        
+        // convert path into segments
         result.segments = (function() {
             var ret = result.path.replace(/^\//, '').replace(/\/$/, '').split('/');
             if (ret.length === 1 && ret[0].length === 0) {
@@ -290,7 +291,7 @@
         
         get: function(callback, /* consider removing from function argument list and access via arguments array */ verb) {
             var async = callback != null;
-
+            
             // initiate AJAX request
             var xhr = $.ajax({
                 context: this,
@@ -309,7 +310,8 @@
                 beforeSend: this._beforeSend,
                 
                 // set callback
-                complete: async && function(xhr) {
+                complete: async &&
+                function(xhr) {
                     extendXhr(xhr);
                     if (callback) {
                         _.callOrPublish(callback, xhr);
@@ -349,7 +351,8 @@
                 beforeSend: this._beforeSend,
                 
                 // set callback
-                complete: async && function(xhr) {
+                complete: async &&
+                function(xhr) {
                     extendXhr(xhr);
                     if (callback) {
                         _.callOrPublish(callback, xhr);
