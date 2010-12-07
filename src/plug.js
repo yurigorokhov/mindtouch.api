@@ -20,19 +20,29 @@
  */
 (function() {
     var root = this;
+    var $ = root.jQuery;
     
     root.Plug = function(url, options) {
+    
+        // ensure we have a url to work with
         if (!url) {
             throw new Error("missing url argument");
         }
+        
+        // in case we're called as a regular function
+        if (!(this instanceof Plug)) {
+            return new Plug(url, options);
+        }
+        
+        // initailize options if omitted
         options || (options = {});
         this.headers = options.headers || {};
-        _.extend(this, _.isString(url) ? _parseUrl(url) : url, options);
+        $.extend(this, (typeof url === 'string') ? _parseUrl(url) : url, options);
     };
     
     // object used to extend XHR instances (since it has no prototype)
     var extendXhr = function(xhr) {
-        return _.extend(xhr, {
+        return $.extend(xhr, {
             getStatusText: function() {
                 switch (this.status) {
                 case 100:
@@ -152,7 +162,7 @@
         });
     };
     
-	// uri parser function
+    // uri parser function
     var _uriRegex = /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(#.*)?)/;
     var _uriRegexKeys = ['original', 'protocol', 'authority', 'userInfo', 'user', 'password', 'hostname', 'port', 'relative', 'path', 'directory', 'file', 'query', 'fragment'];
     var _parseUrl = function(url) {
@@ -254,7 +264,7 @@
         return result;
     };
     
-    _.extend(this.Plug.prototype, {
+    $.extend(this.Plug.prototype, {
         getUrl: function() {
             var url = '';
             if (this.protocol) {
@@ -272,7 +282,7 @@
             if (this.params) {
                 url += '?';
                 var first = true;
-                _.each(this.params, function(value, key) {
+                $.each(this.params, function(key, value) {
                     if (!first) {
                         url += '&';
                     }
@@ -385,73 +395,77 @@
         
         at: function() {
             for (var i = 0; i < arguments.length; ++i) {
-                if (_.isNull(arguments[i])) {
+                if (arguments[i] === null) {
                     throw new Error('argument ' + (i + 1) + ' is null');
                 }
             }
-            var segments = this.segments.concat.apply(this.segments, _.map(arguments, function(v) {
-                return _.isString(v) ? v : new String(v);
-            }));
-            return new Plug(this, _.extend({}, this.options, {
+            var segments = [];
+            $.each(this.segments, function(index, value) {
+                segments.push(value.toString());
+            });
+            $.each(arguments, function(index, value) {
+                segments.push(value.toString());
+            });
+            return new Plug(this, $.extend({}, this.options, {
                 segments: segments,
                 trailingSlash: false
             }));
         },
         
         withParam: function(key, value) {
-            var params = _.extend({}, this.params);
+            var params = $.extend({}, this.params);
             params[key] = value;
-            return new Plug(this, _.extend({}, this.options, {
+            return new Plug(this, $.extend({}, this.options, {
                 params: params
             }));
         },
         
         withParams: function(values) {
-            var params = _.extend({}, this.params, values);
-            return new Plug(this, _.extend({}, this.options, {
+            var params = $.extend({}, this.params, values);
+            return new Plug(this, $.extend({}, this.options, {
                 params: params
             }));
         },
         
         withoutParam: function(key) {
-            var params = _.extend({}, this.params);
+            var params = $.extend({}, this.params);
             delete params[key];
-            return new Plug(this, _.extend({}, this.options, {
+            return new Plug(this, $.extend({}, this.options, {
                 params: params
             }));
         },
         
         withTrailingSlash: function() {
-            return new Plug(this, _.extend({}, this.options, {
+            return new Plug(this, $.extend({}, this.options, {
                 trailingSlash: true
             }));
         },
         
         withoutTrailingSlash: function() {
-            return new Plug(this, _.extend({}, this.options, {
+            return new Plug(this, $.extend({}, this.options, {
                 trailingSlash: true
             }));
         },
         
         withHeader: function(key, value) {
-            var headers = _.extend({}, this.headers);
+            var headers = $.extend({}, this.headers);
             headers[key] = value;
-            return new Plug(this, _.extend({}, this.options, {
+            return new Plug(this, $.extend({}, this.options, {
                 headers: headers
             }));
         },
         
         withHeaders: function(values) {
-            var headers = _.extend({}, this.headers, values);
-            return new Plug(this, _.extend({}, this.options, {
+            var headers = $.extend({}, this.headers, values);
+            return new Plug(this, $.extend({}, this.options, {
                 headers: headers
             }));
         },
         
         withoutHeader: function(key) {
-            var headers = _.extend({}, this.headers);
+            var headers = $.extend({}, this.headers);
             delete headers[key];
-            return new Plug(this, _.extend({}, this.options, {
+            return new Plug(this, $.extend({}, this.options, {
                 headers: headers
             }));
         },
