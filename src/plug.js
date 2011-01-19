@@ -158,7 +158,25 @@
             
             errorMessage: function(message) {
                 return (mesage || 'Request failed') + ' (status: ' + this.status + ' - ' + this.getStatusText() + ')';
-            }
+            },
+			
+			isJson: function() {
+				var jsonType = 'application/json';
+				var contentType = this.getResponseHeader('Content-Type') || '';
+				return contentType.substr(0, jsonType.length) === jsonType;
+			},
+			
+			getJson: function() {
+				if(!this.isSuccess()) {
+					throw new Error('Response failed (status: ' + this.status + ' - ' + this.getStatusText() + ')');
+				}
+				if(!this.isJson()) {
+					throw new Error('Response is not JSON (Content-Type: ' + this.getResponseHeader('Content-Type') + ')');
+				}
+				
+				// TODO (steveb): we should use a safe JSON parsing library here like JSON2!
+				return eval(this.responseText);
+			}
         });
     };
     
@@ -322,17 +340,11 @@
                 // set callback
                 complete: async &&
                 function(xhr) {
-                    extendXhr(xhr);
-                    if (callback) {
-                        _.callOrPublish(callback, xhr);
-                    } else if (!xhr.isSuccess()) {
-                        throw new Error('Plug ' + (this.headers['X-HTTP-Method-Override'] || 'GET') + ' request failed for ' + this.getUrl() + ' (status: ' + xhr.status + ' - ' + xhr.getStatusText() + ')');
-                    }
+                    _.callOrPublish(callback, extendXhr(xhr));
                 }
             });
             if (!async) {
-                extendXhr(xhr);
-                return xhr;
+                return extendXhr(xhr);
             }
         },
         
@@ -363,17 +375,11 @@
                 // set callback
                 complete: async &&
                 function(xhr) {
-                    extendXhr(xhr);
-                    if (callback) {
-                        _.callOrPublish(callback, xhr);
-                    } else if (!xhr.isSuccess()) {
-                        throw new Error('Plug ' + (this.headers['X-HTTP-Method-Override'] || 'POST') + ' request failed for ' + this.getUrl() + ' (status: ' + xhr.status + ' - ' + xhr.getStatusText() + ')');
-                    }
+                    _.callOrPublish(callback, extendXhr(xhr));
                 }
             });
             if (!async) {
-                extendXhr(xhr);
-                return xhr;
+                return extendXhr(xhr);
             }
         },
         
