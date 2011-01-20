@@ -174,7 +174,7 @@
 					throw new Error('Response is not JSON (Content-Type: ' + this.getResponseHeader('Content-Type') + ')');
 				}
 				
-				// TODO (steveb): we should use a safe JSON parsing library here like JSON2!
+				// TODO (steveb): we should use a safe JSON parsing library here like jQuery.parseJSON!
 				return eval(this.responseText);
 			}
         });
